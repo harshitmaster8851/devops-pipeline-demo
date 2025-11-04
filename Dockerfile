@@ -1,13 +1,8 @@
-# Use official Python image
-FROM python:3.9-slim
-
+# Dockerfile
+FROM node:18-alpine
 WORKDIR /app
-
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . /app
-
-EXPOSE 8080
-
-CMD ["python", "app.py"]
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+EXPOSE 8081
+CMD ["npm", "start"]
