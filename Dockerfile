@@ -1,17 +1,13 @@
-# Dockerfile (place at repo root)
+# Use official Python image
 FROM python:3.9-slim
 
 WORKDIR /app
 
-# copy requirements and install first to use layer caching
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# copy app
 COPY . /app
 
-# expose flask port
-EXPOSE 5000
+EXPOSE 8080
 
-# run app
 CMD ["python", "app.py"]
