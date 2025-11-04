@@ -1,4 +1,3 @@
-// Jenkinsfile (Declarative - place at repo root)
 pipeline {
   agent any
 
@@ -25,10 +24,10 @@ pipeline {
     stage('Deploy') {
       steps {
         script {
-          // stop & remove existing container if present (safe)
+          // stop & remove existing container if present
           sh 'docker ps -q --filter "name=$CONTAINER_NAME" | grep -q . && docker stop $CONTAINER_NAME || true'
           sh 'docker ps -a -q --filter "name=$CONTAINER_NAME" | grep -q . && docker rm $CONTAINER_NAME || true'
-          // run new container mapping host 8080->container 8080
+          // run new container mapping host 8080 to container 8080
           sh 'docker run -d -p 8080:8080 --name $CONTAINER_NAME $IMAGE_NAME'
         }
       }
