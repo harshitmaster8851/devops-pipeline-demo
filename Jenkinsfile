@@ -28,7 +28,7 @@ pipeline {
           sh 'docker ps -q --filter "name=$CONTAINER_NAME" | grep -q . && docker stop $CONTAINER_NAME || true'
           sh 'docker ps -a -q --filter "name=$CONTAINER_NAME" | grep -q . && docker rm $CONTAINER_NAME || true'
           // run new container mapping host 8080 to container 8080
-          sh 'docker run -d -p 8080:8080 --name $CONTAINER_NAME $IMAGE_NAME'
+          sh 'docker run -d -p 8081:8080 --name $CONTAINER_NAME $IMAGE_NAME'
         }
       }
     }
