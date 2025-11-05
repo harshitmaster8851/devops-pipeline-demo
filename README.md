@@ -224,11 +224,11 @@ sudo nginx -t && sudo systemctl reload nginx
 
   * Add the following files in the repo:
 
-    Dockerfile 🐳 
+    [Dockerfile](https://github.com/harshitmaster8851/devops-pipeline-demo/blob/1a2d5e6d240cab31b7d77e66a73eb33f45a7b71a/Dockerfile) 🐳
 
-    Jenkinsfile ⚙️
+    [Jenkinsfile](https://github.com/harshitmaster8851/devops-pipeline-demo/blob/1a2d5e6d240cab31b7d77e66a73eb33f45a7b71a/Jenkinsfile)⚙️
 
-    website (contains your static website like Tooplate template)
+    [website](https://github.com/harshitmaster8851/devops-pipeline-demo/tree/1a2d5e6d240cab31b7d77e66a73eb33f45a7b71a/website) (contains your static website like Tooplate template)
 
 
 * Commit and push all files.
