@@ -65,158 +65,150 @@ By implementing the **Jenkins–Docker–Nginx–AWS EC2** pipeline:
 
 ---
 
-## 🏗️ **Flow of Execution — CI/CD Pipeline**
+## 🔁 Flow of Execution — CI/CD Pipeline Overview
 
-### 1️⃣ Developer Pushes Code to GitHub
-- Developer commits and pushes changes (e.g., updates `index.html`) to the **main** branch.  
-- **GitHub Webhook** notifies **Jenkins** about the new push.
+🧑‍💻 Developer Pushes Code to GitHub
+➜ A new commit is pushed to the main branch of your repository.
+
+📩 GitHub Webhook Triggers Jenkins
+➜ Jenkins receives the push event instantly and starts the CI/CD pipeline automatically.
+
+⚙️ Jenkins Executes the Pipeline
+➜ Pulls the latest code → Builds a new Docker image → Deploys it on AWS EC2 via SSH.
+
+🐳 Docker Container Starts on EC2
+➜ The web app runs inside a container on port 8081 with your latest changes.
+
+🌐 Nginx Reverse Proxy Forwards Requests
+➜ Nginx (on EC2) listens on port 80 and forwards traffic to 127.0.0.1:8081, serving your app to users.
+
+🚀 Live Website Instantly Updated
+➜ The new version of your web app goes live at http://<EC2_PUBLIC_IP>, automatically — no manual steps!
 
 ---
 
-### 2️⃣ Jenkins Automatically Triggers the Pipeline
+## 📂 Project Structure Diagram
 
-#### 🧱 Stage 1: Checkout
-```bash
-git clone https://github.com/harshitmaster8851/devops-pipeline-demo.git
-```
-Pulls the latest code from GitHub to ensure the build uses the newest version.
+<img width="1536" height="1024" alt="workflow image" src="https://github.com/user-attachments/assets/63d91789-4a1b-4dc4-b449-84bde2bd4f18" />
 
-🐳 Stage 2: Build
-```bash
-Copy code
-docker build -t devops-demo-app .
-```
+---
 
-Builds a Docker image using the project’s Dockerfile.
+## 📸 Demo Clip
+🎥 
 
-🚀 Stage 3: Deploy to EC2
+💬 This project demonstrates a real-world CI/CD setup integrating GitHub, Jenkins, Docker, Nginx, and AWS EC2 — a fully automated, production-grade DevOps pipeline. 🚀
 
-Jenkins connects to the EC2 instance via SSH using ec2-ssh credentials:
-
-```bash
-Copy code
-docker stop devops-demo-container || true
-docker rm devops-demo-container || true
-docker run -d --name devops-demo-container -p 127.0.0.1:8081:8080 devops-demo-app
-sudo nginx -t && sudo systemctl reload nginx
-```
-
-3️⃣ Nginx Reverse Proxy (on EC2)
-
-Nginx listens on port 80 and forwards traffic to the Docker container running on 127.0.0.1:8081.
-
-When users visit http://<EC2_PUBLIC_IP>, Nginx serves the web app from the container.
-
-4️⃣ User Accesses the Live Website
-
-Browser request flow:
-
-EC2 → Nginx → Docker Container → index.html
-
-The static website (Tooplate template) loads instantly.
-
-5️⃣ Continuous Integration Loop
-
-Every new Git push triggers Jenkins again → rebuilds the image → redeploys automatically.
-
-6️⃣ Auto-Repo Discovery via GitHub App
-
-Jenkins Organization Folder (linked via GitHub App) automatically:
-
-Detects new repos containing a Jenkinsfile
-
-Creates pipeline jobs dynamically
-
-Builds and deploys automatically
-
-📂 Project Structure Diagram
-  
+--- 
 
 🌍 User Accesses Site → http://<EC2_PUBLIC_IP>
 
 
+---
 
-🚀 Deployment Steps
 
-🧩 Phase 1 — One-Time Infrastructure Setup
 
-🖥️ Step 1: Launch an EC2 Instance
-Open ports: 22 (SSH), 80 (HTTP), 8080 (Jenkins), 8081 (App)
+## 🚀 Deployment Steps
 
-⚙️ Step 2: Install Required Packages
+
+  ### 🧩 Phase 1 — One-Time Infrastructure Setup
+
+  🖥️ Step 1: Launch an AWS EC2 Instance
+
+  Choose Ubuntu 20.04 (Free Tier eligible).
+
+  Open these ports in your Security Group:
+
+  | Port | Purpose        | Access       |
+  | ---- | -------------- | ------------ |
+  | 22   | SSH            | Your IP only |
+  | 80   | HTTP (Website) | Open to all  |
+  | 8080 | Jenkins        | Your IP only |
+  | 8081 | App Container  | Your IP only |
+
+
+
+  ⚙️ Step 2: Install Core Packages
   ```bash
-      Copy code
-      sudo apt update
-      sudo apt install -y git docker.io nginx
-      sudo systemctl enable --now docker nginx
+  sudo apt update
+  sudo apt install -y git docker.io nginx
+  sudo systemctl enable --now docker nginx
   ```
 
-⚙️ Step 3: Install Jenkins
-
+  ⚙️ Step 3: Install Jenkins
   ```bash
-      Copy code
-      curl -fsSL https://pkg.jenkins.io/debian/jenkins.io.key | sudo tee \
-        /usr/share/keyrings/jenkins-keyring.asc > /dev/null
-      echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
-        https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
-        /etc/apt/sources.list.d/jenkins.list > /dev/null
-      sudo apt update
-      sudo apt install -y fontconfig openjdk-17-jre jenkins
-      sudo systemctl enable --now jenkins
+  curl -fsSL https://pkg.jenkins.io/debian/jenkins.io.key | sudo tee \
+    /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+
+  echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+    https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+    /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+  sudo apt update
+  sudo apt install -y fontconfig openjdk-17-jre jenkins
+  sudo systemctl enable --now jenkins
   ```
 
-        Access Jenkins:
-        👉 http://<EC2_PUBLIC_IP>:8080
 
-        Unlock Jenkins:
+  🧭 Access Jenkins:
+  👉 http://<EC2_PUBLIC_IP>:8080
 
-        ```bash
-        Copy code
-        sudo cat /var/lib/jenkins/secrets/initialAdminPassword`
-        ```
+  Unlock Jenkins:
 
-Step 4: Install Required Jenkins Plugins
+  ```bash 
+  sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+  ```
 
-Go to Manage Jenkins → Plugins → Available, and install the following essential plugins:
 
-🔹 GitHub Integration — enables Jenkins to connect and interact with GitHub repositories.
+  Install suggested plugins and create your admin user.
 
-🔹 GitHub Branch Source — allows Jenkins to discover branches and pull requests automatically.
+### Phase 2 — Jenkins Setup via Web Interface
 
-🔹 GitHub API — provides API-level connectivity between Jenkins and GitHub.
+  🧩 Step 4: Install Required Plugins
 
-🔹 Pipeline — supports defining and executing CI/CD pipelines using Jenkinsfile.
+  * Go to Manage Jenkins → Plugins → Available, then install:
 
-🔹 Credentials Binding — securely manages and injects credentials into build jobs.
+    🔹 GitHub Integration
 
-🔹 SSH Agent — allows Jenkins to connect to remote servers (like EC2) via SSH for deployments.
+    🔹 GitHub Branch Source
 
-🔹 Docker Pipeline — integrates Docker build, run, and push stages directly inside Jenkins pipelines.
+    🔹 GitHub API
+
+    🔹 Pipeline
+
+    🔹 Credentials Binding
+
+    🔹 SSH Agent
+
+    🔹 Docker Pipeline
+
+    ✅ These enable Jenkins to pull from GitHub, build with Docker, and deploy on EC2.
+
 
 🔑 Step 5: Add Jenkins Credentials
 
-ID	Type	Description
-ec2-ssh	SSH Username with Private Key	For Jenkins to connect to EC2
+Navigate to:
+Manage Jenkins → Credentials → Global → Add Credentials
 
-github-app	GitHub App Credential	For GitHub App integration
-
-dockerhub-creds	Username + Password (optional)	For Docker Hub push
+| ID                | Type                             | Description                              |
+| ----------------- | -------------------------------- | ---------------------------------------- |
+| `ec2-ssh`         | SSH Username with Private Key    | Used by Jenkins to connect to EC2        |
+| `github-app`      | GitHub App Credential            | Used for GitHub integration              |
 
 
 🌐 Step 6: Configure Nginx on EC2
 
-```bash
-Copy code
+* Create a reverse proxy config file so Nginx can route traffic from port 80 → 8081 (where Docker runs your app):
+```bash 
 sudo tee /etc/nginx/conf.d/devops-proxy.conf > /dev/null <<'NGINX'
 server {
-    listen 80;
-    server_name _;
-    location / {
-        proxy_pass http://127.0.0.1:8081;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
+  listen 80;
+  server_name _;
+  location / {
+      proxy_pass http://127.0.0.1:8081;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  }
 }
 NGINX
 
@@ -224,66 +216,48 @@ sudo nginx -t && sudo systemctl reload nginx
 ```
 
 
-🧠 Phase 2 — Jenkins Pipeline Configuration
+### ⚙️ Phase 3 — GitHub Integration and Automation
 
-⚙️ Step 7: Create a Pipeline Job
+🧱 Step 7: Set Up Your GitHub Repository
 
-Jenkins Dashboard → New Item → Pipeline
+* On GitHub (web), create a new repository — e.g. devops-pipeline-demo
 
-SCM: Git → Repo URL:
-https://github.com/<your-username>/devops-pipeline-demo.git
+  * Add the following files in the repo:
 
-Branch: main
+    Dockerfile 🐳 
 
-Script Path: Jenkinsfile
+    Jenkinsfile ⚙️
 
-Save → Build Now
+    website (contains your static website like Tooplate template)
 
-⚙️ Step 8: Configure GitHub Webhook (Manual Method)
 
-GitHub Repo → Settings → Webhooks → Add Webhook
+* Commit and push all files.
 
-Payload URL: http://<EC2_PUBLIC_IP>:8080/github-webhook/
+📩 Step 8: Connect GitHub → Jenkins (Webhook Method)
 
-Content type: application/json
+--> Go to GitHub → Repo → Settings → Webhooks → Add Webhook
 
-Event: Push
+* Enter Payload URL: http://<EC2_PUBLIC_IP>:8080/github-webhook/
 
-🤖 Step 9: Configure GitHub App Integration
+* Content type: application/json
 
-Create a GitHub App under
+* Event: Just the Push event
 
-Settings → Developer Settings → GitHub Apps → New GitHub App
+* Click Add Webhook
 
-Set Webhook URL:
+✅ Now Jenkins will automatically trigger the build whenever you push code to GitHub!
 
-http://<EC2_PUBLIC_IP>:8080/github-webhook/
 
-Permissions:
+| Stage | Action   | Description                                   |
+| ----- | -------- | --------------------------------------------- |
+| 1️⃣   | Checkout | Jenkins pulls the latest code from GitHub     |
+| 2️⃣   | Build    | Jenkins builds a new Docker image             |
+| 3️⃣   | Deploy   | Jenkins runs the container on EC2 (port 8081) |
+| 4️⃣   | Serve    | Nginx forwards port 80 → 8081                 |
+| ✅     | Result   | Website live at `http://<EC2_PUBLIC_IP>/`     |
 
-Contents → Read-only
-Metadata → Read-only
-Webhooks → Read & write
-Subscribe to events:
-Push
-Repository
-Pull request
-Generate a Private Key (.pem) and note the App ID.
-Convert the key to PKCS#8:
 
-```bash
-Copy code
-openssl pkcs8 -topk8 -inform PEM -outform PEM \
--in github-app-key.pem -out github-app-key-pk8.pem -nocrypt
-```
-
-Add to Jenkins under Credentials → GitHub App.
-
-Create a GitHub Organization Folder in Jenkins and select this credential.
-
-✅ Jenkins will now automatically detect and build all repos containing a Jenkinsfile.
-
-⚠️ Important Notes
+## ⚠️ Important Notes
 
 Public IP Changes After EC2 Restart → Update IP in Jenkinsfile & GitHub webhook.
 
@@ -295,23 +269,11 @@ Use Elastic IP → Prevent changing IPs on reboot.
 
 Clean Docker Images → Free space using sudo docker system prune -af.
 
-👩‍💻 Author
+## 👩‍💻 Author
 Harshit Rastogi
 🎓 B.Tech 3rd Year @ USICT, Dwarka
 🔗 GitHub Profile
 
-📸 Demo Clip
-🎥 (Add your project demo GIF or video link here — e.g., build trigger + live site refresh)
-
-💬 This project demonstrates a real-world CI/CD setup integrating GitHub, Jenkins, Docker, Nginx, and AWS EC2 — a fully automated, production-grade DevOps pipeline. 🚀
-## Badges
-
-Add badges from somewhere like: [shields.io](https://shields.io/)
-
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
-[![AGPL License](https://img.shields.io/badge/license-AGPL-blue.svg)](http://www.gnu.org/licenses/agpl-3.0)
-
 
 ## Badges
 
@@ -321,3 +283,5 @@ Add badges from somewhere like: [shields.io](https://shields.io/)
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
 [![AGPL License](https://img.shields.io/badge/license-AGPL-blue.svg)](http://www.gnu.org/licenses/agpl-3.0)
 
+
+****
