@@ -94,7 +94,7 @@ By implementing the **Jenkins–Docker–Nginx–AWS EC2** pipeline:
 ---
 
 ## 📸 Demo Clip
-🎥  https://github.com/user-attachments/assets/b189fdc7-0b36-4c73-9c3a-11fc949e36d9
+🎥  [CLIP](https://github.com/user-attachments/assets/b189fdc7-0b36-4c73-9c3a-11fc949e36d9)
 
 
 
