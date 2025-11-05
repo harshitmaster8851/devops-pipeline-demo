@@ -94,7 +94,9 @@ By implementing the **Jenkins–Docker–Nginx–AWS EC2** pipeline:
 ---
 
 ## 📸 Demo Clip
-🎥 
+🎥  https://github.com/user-attachments/assets/b189fdc7-0b36-4c73-9c3a-11fc949e36d9
+
+
 
 💬 This project demonstrates a real-world CI/CD setup integrating GitHub, Jenkins, Docker, Nginx, and AWS EC2 — a fully automated, production-grade DevOps pipeline. 🚀
 
